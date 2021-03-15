@@ -16,7 +16,7 @@ edu/eci/arsw/blueprints/model/Blueprint.java
  edu.eci.arsw.blueprints.model.Blueprint
 edu/eci/arsw/blueprints/controllers/BlueprintAPIController.java
  edu.eci.arsw.blueprints.controllers.BlueprintAPIController
-edu/eci/arsw/blueprints/persistence/BlueprintsPersistence.java
- edu.eci.arsw.blueprints.persistence.BlueprintsPersistence
 edu/eci/arsw/blueprints/persistence/impl/Tuple.java
  edu.eci.arsw.blueprints.persistence.impl.Tuple
+edu/eci/arsw/blueprints/persistence/BlueprintsPersistence.java
+ edu.eci.arsw.blueprints.persistence.BlueprintsPersistence
