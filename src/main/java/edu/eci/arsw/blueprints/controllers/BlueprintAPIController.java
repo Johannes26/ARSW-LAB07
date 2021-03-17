@@ -86,6 +86,17 @@ public class BlueprintAPIController {
         }
     }
 
+    @RequestMapping(path = "/{author}/{name}",method = RequestMethod.DELETE)
+    public ResponseEntity<?> DeleteBluePrint(@PathVariable ("author") String authorName, @PathVariable ("name") String blueprintName){
+        try {
+            bps.deleteBluePrint(authorName,blueprintName);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.FORBIDDEN);
+        }
+    }
+
 
 }
 

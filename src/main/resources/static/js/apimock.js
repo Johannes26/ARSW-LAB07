@@ -1,7 +1,7 @@
 
 var apimok = (function () {
-    var mockdata = [];
-    mockdata["JhonConnor"] = [
+    var _mockdata = [];
+    _mockdata["JhonConnor"] = [
         {
             author: "JhonConnor",
             name: "house",
@@ -35,7 +35,7 @@ var apimok = (function () {
             ]
         }
     ];
-    mockdata["LexLuthor"] = [
+    _mockdata["LexLuthor"] = [
         {
             author: "LexLuthor",
             name: "kryptonite",
@@ -51,21 +51,23 @@ var apimok = (function () {
             ]
         }
     ];
-    return {
-        getBlueprintsByAuthor: function (name, callback) {
-            callback(
-                mockdata[name]
-            )
-        },
+    var getBlueprintsByAuthor = function (name, callback) {
+        callback(
+            _mockdata[name]
+        );
+    };
 
-        getBlueprintsByNameAndAuthor: function (autor, obra, callback) {
-            callback(
-                mockdata[autor].filter(prueb => { return prueb.name === obra; })[0]
-            );
-        },
-        addPoint: (autor, obra, point) => {
-            console.log("entro a agregar punto",autor);
-            var p = mockdata[autor].filter(obj=>obj.name===obra)[0].points.push(point);
-        }
+    var getBlueprintsByNameAndAuthor = function (autor, obra, callback) {
+        callback(
+            _mockdata[autor].filter(prueb => { return prueb.name === obra; })[0]
+        );
+    };
+
+    var addPoint = (autor, obra, point) => {
+        var p = _mockdata[autor].filter(obj => obj.name === obra)[0].points.push(point);
+    }
+    return {
+        getBlueprintsByAuthor: getBlueprintsByAuthor,
+        getBlueprintsByNameAndAuthor: getBlueprintsByNameAndAuthor
     }
 })();

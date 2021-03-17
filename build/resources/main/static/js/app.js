@@ -1,88 +1,78 @@
+//var api = apimok;
+var api = apiclient;
+
 var app = (function () {
 
-    var author = null;
-    var plano = null;
+    var _author = null;
+    var _plano = null;
+    var blueprint = null;
 
-    var init = function () {
-        var canvas = document.getElementById("myCanvas");
-        console.info('initialized');
-        console.log(offset)
-        var offset = getOffset(canvas);
-        if (window.PointerEvent) {
-            canvas.addEventListener("pointerdown", _Draw);
-        }
-        else {
-            canvas.addEventListener("mousedown", function (event) {
-                alert('mousedown at ' + + ',' + event.clientY - offset.top);
-            });
-        }
-    };
-
-    function getOffset(obj) {
-        var offsetLeft = 0;
-        var offsetTop = 0;
-        do {
-            if (!isNaN(obj.offsetLeft)) {
-                offsetLeft += obj.offsetLeft;
-            }
-            if (!isNaN(obj.offsetTop)) {
-                offsetTop += obj.offsetTop;
-            }
-        } while (obj = obj.offsetParent);
-        return { left: offsetLeft, top: offsetTop };
+    var plansAuthor = function () {
+        limpiarVista();
+        console.log("consultar author");
+        _author = document.getElementById("autor").value;
+        api.getBlueprintsByAuthor(_author, _modifyTable);
     }
 
-    function _Draw(event) {
-        console.log("Entro a dibujar", author, plano);
-        if (author != null && plano != null) {
-            var canvas = document.getElementById("myCanvas");
-            var offset = getOffset(canvas);
-            console.log(plano);
-            apimok.addPoint(
-                author,plano,{
-                    x: event.pageX - offset.left,
-                    y: event.pageY - offset.top
-                }
-            );
-            _drawPlan(plano);
-        }
-    }
-
-
-
-    var _funcModify = function (variable) {
+    var _modifyTable = function (variable) {
         if (variable != null) {
             var arreglo = variable.map(function (blueprint) {
                 return { key: blueprint.name, value: blueprint.points.length }
             })
+
             $("#tabla tbody").empty();
             arreglo.map(function (blueprint) {
-                var temporal = '<tr><td id="nombreActor">' + blueprint.key + '</td><td id="puntos">' + blueprint.value + '</td><td type="button" class="button" onclick="app.drawPlan(\'' + blueprint.key + '\')">Open</td></tr>';
+                var temporal = `<tr>
+                                    <td id="nombreActor">  ${blueprint.key}</td>
+                                    <td id="puntos">  ${blueprint.value}</td>
+                                    <td type="button" class="button" onclick= " app.drawPlan('${blueprint.key}')">Open</td>
+                                </tr>`;
                 $("#tabla tbody").append(temporal);
             })
 
-            var valorTotal = arreglo.reduce(function (total, valor) {
-                return total.value + valor.value;
-            })
-            document.getElementById("autorLabel").innerHTML = author;
+            if (arreglo.length > 1) {
+                var valorTotal = arreglo.reduce(function (total, valor) {
+                    return total.value + valor.value;
+                });
+            } else {
+                var valorTotal = arreglo[0].value;
+            }
+
+            document.getElementById("autorLabel").innerHTML = _author;
             document.getElementById("puntosLabel").innerHTML = valorTotal;
+        } else {
+            console.log("no encontro autor");
+            limpiarVista();
+            alert("Autor no existe");
         }
     };
 
-    var _drawPlan = function (name) {
-        author = document.getElementById("autor").value;
-        obra = name;
-        console.log(name);
-        //apiclient.getBlueprintsByNameAndAuthor(author, obra, _funcDraw);
-        apimok.getBlueprintsByNameAndAuthor(author, obra, _funcDraw);
+    var limpiarVista = function () {
+
+        _author = null;
+        _plano = null;
+        $("#tabla tbody").empty();
+        $("#puntosLabel").empty();
+        $("#autorLabel").empty();
+        var c = document.getElementById("myCanvas");
+        var ctx = c.getContext("2d");
+        ctx.clearRect(0, 0, c.width, c.height);
+        blueprint = null;
+    }
+
+    var updatebluesprint = function (autor) {
+        api.getBlueprintsByAuthor(autor, _modifyTable);
+    }
+
+    var drawPlan = function (name) {
+        _plano = name;
+        api.getBlueprintsByNameAndAuthor(_author, _plano, _funcDraw);
     }
 
 
     var _funcDraw = function (vari) {
         if (vari) {
-            author = vari.author;
-            plano = vari.name;
-            console.log(author, plano);
+            blueprint = vari;
             var lastx = null;
             var lasty = null;
             var actx = null;
@@ -90,10 +80,10 @@ var app = (function () {
             var c = document.getElementById("myCanvas");
             var ctx = c.getContext("2d");
 
-            ctx.clearRect(0, 0, 700, 450);
+            ctx.clearRect(0, 0, c.width, c.height);
             ctx.beginPath();
 
-            vari.points.map(function (prue) {
+            blueprint.points.map(function (prue) {
                 if (lastx == null) {
                     lastx = prue.x;
                     lasty = prue.y;
@@ -109,15 +99,56 @@ var app = (function () {
             });
         }
     }
+
+    function addPoint(point) {
+        if (_author != null && _plano != null) {
+            blueprint.points.push(point);
+            _funcDraw(blueprint);
+        } else if (_author != null) {
+            alert("Seleccione un plano")
+        }
+    }
+
+    function save() {
+        if (_author != null && _plano != null) {
+            api.save(blueprint);
+        }
+    }
+
+    function deletebluesprint() {
+        if (_author != null && _plano != null) {
+            api.deleteblueprint(blueprint);
+        } else {
+            if (author == null) {
+                alert("Seleccione primero un autor y un plano")
+            } else {
+                alert("Seleccione un plano")
+            }
+        }
+    }
+
+    function createnewbluesprint() {
+        if (_author != null) {
+            var name = prompt("Deme el nombre del nuevo plano", "");
+            var c = document.getElementById("myCanvas");
+            var ctx = c.getContext("2d");
+            ctx.clearRect(0, 0, c.width, c.height);
+            _plano = name;
+            blueprint = null;
+            api.createnewbluesprint(_author, name);
+        } else {
+            alert("Elija un autor");
+        }
+
+    }
+
     return {
-        init: init,
-
-        plansAuthor: function () {
-            author = document.getElementById("autor").value;
-            //apiclient.getBlueprintsByAuthor(author, _funcModify);
-            apimok.getBlueprintsByAuthor(author, _funcModify);
-        },
-
-        drawPlan: _drawPlan
+        plansAuthor: plansAuthor,
+        drawPlan: drawPlan,
+        addPoint: addPoint,
+        updatebluesprint: updatebluesprint,
+        save: save,
+        createnewbluesprint: createnewbluesprint,
+        deletebluesprint: deletebluesprint
     };
 })();
